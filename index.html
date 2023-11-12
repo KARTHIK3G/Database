@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Feedback Form</title>
+   
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+     
+    <style>
+        /* Basic styles for the form */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 10;
+            padding: 10;
+/*            background-image:url('https://www.dl.dropboxusercontent.com/scl/fi/v529rqgbm2qn8u5teaqup/1699263415244.jpg?rlkey=k8c3rqfbcpp5v6ivedci92jkt');
+*/
+
+            width:100vw;
+            height:100vh;
+            background-size:cover;
+            background-repeat:no-repeat;
+            background-postion:center center;
+            background-attachment:fixed;
+            font-family:monospace;
+        }
+
+        form {
+            color:red;
+            max-width: 600px;
+            margin: 20px auto;
+            background:#3bff00;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            height: 150px;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            form {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            input[type="text"],
+            input[type="email"],
+            textarea {
+                margin-bottom: 10px;
+            }
+
+            button {
+                margin-top: 15px;
+            }
+        }
+        .im
+        {
+            border:none;
+            
+        }
+        h2{
+            text-align:center;
+            font-family:'Times New Roman';
+            font-size:5vh;
+            
+        }
+    </style>
+</head>
+<body>
+<div><h2>Hey can I take your few Minutes</h2></div>
+<form method="get" id="userDataForm">
+    <div>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+    </div>
+    <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+    </div>
+    <div>
+        <label for="file">File:</label>
+        <input class="im" type="file" id="fileI" name="inpFile" multiple required>
+    </div>
+    <div>
+        <label for="feedback">Feedback:</label>
+        <textarea id="feedback" name="feedback" required></textarea>
+    </div>
+    <button type="submit">Submit</button>
+</form>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-database.js";
+    import { getStorage, ref as storageRef, uploadBytes } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-storage.js";
+
+    // Your Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyA2mR3XDIpaEhFUoubYTC9lDrC6nmm6gWg",
+    authDomain: "kartozfirst.firebaseapp.com",
+    databaseURL: "https://kartozfirst-default-rtdb.firebaseio.com",
+    projectId: "kartozfirst",
+    storageBucket: "kartozfirst.appspot.com",
+    messagingSenderId: "506367297364",
+    appId: "1:506367297364:web:80ee1c9c61e00d761d2ac1",
+    measurementId: "G-6XFK5XVS2W"
+        
+        
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const storage = getStorage(app);
+
+    const form = document.getElementById('userDataForm');
+    const fileInput = document.getElementById('fileI');
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const exampleData = {};
+        formData.forEach((value, key) => {
+            exampleData[key] = value;
+        });
+
+        const file = fileInput.files[0];
+        if (file) {
+            const imageStorageRef = storageRef(storage, 'images/' + file.name);
+            const snapshot = await uploadBytes(imageStorageRef, file);
+            //const downloadURL = await snapshot.ref.getDownloadURL();
+            exampleData['imageURL'] = fileInput.value;
+        }
+
+        const databaseRef = ref(database, 'users');
+        push(databaseRef, exampleData)
+            .then(() => {
+                alert("Data has been written to the database");
+                form.reset();
+            })
+            .catch((error) => {
+                alert("Error writing data:", error);
+            });
+    });
+</script>
+
+</body>
+</html>
